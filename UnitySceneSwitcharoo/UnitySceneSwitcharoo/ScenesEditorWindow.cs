@@ -23,9 +23,6 @@ namespace UnitySceneSwitcharoo
         private void OnGUI()
         {
             EditorGUILayout.Space();
-
-
-
             EditorGUILayout.LabelField("Current Scene: " + EditorSceneManager.GetActiveScene().name, EditorStyles.boldLabel);
             EditorGUILayout.Space();
 
