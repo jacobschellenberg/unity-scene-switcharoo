@@ -117,11 +117,9 @@ namespace UnitySceneSwitcharoo
             sceneGUIDs.ToList().ForEach(sceneGUID =>
             {
                 var sceneFilePath = AssetDatabase.GUIDToAssetPath(sceneGUID);
-
                 var sceneName = Path.GetFileName(sceneFilePath).Replace(".unity", "");
                 var isCurrentScene = sceneFilePath == EditorSceneManager.GetActiveScene().path;
                 var directory = Path.GetDirectoryName(sceneFilePath);
-
                 var unitySceneGroup = unitySceneGroups.FirstOrDefault(group => group.GroupName == directory);
 
                 if (unitySceneGroup == null)
