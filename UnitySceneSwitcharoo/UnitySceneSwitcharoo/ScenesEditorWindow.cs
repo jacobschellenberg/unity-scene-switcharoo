@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using System.Linq;
 using System.IO;
 using UnityEngine;
@@ -11,31 +11,41 @@ namespace UnitySceneSwitcharoo
     {
         private static List<UnitySceneGroup> _unitySceneGroups = new List<UnitySceneGroup>();
         private static Vector2 _scrollPosition = Vector2.zero;
+        private static GUIContent _searchButtonGUIContent = new GUIContent("Highlight this scene in the Project folder.");
 
-        private GUIContent _searchButtonGUIContent;
-
-        private void OnEnable()
+        [MenuItem("Window/Unity Scene Switcharoo")]
+        private static void Initialize()
         {
-            _searchButtonGUIContent = new GUIContent("Highlight this scene in the Project folder.");
-        }
-
-        [MenuItem("Window/Scene Manager")]
-        private static void Init()
-        {
-            var editorWindow = EditorWindow.GetWindow<ScenesEditorWindow>();
-
-            editorWindow.titleContent = new GUIContent("Scene Manager");
+            var editorWindow = EditorWindow.GetWindow<ScenesEditorWindow>("Unity Scene Switcharoo");
             editorWindow.Show();
         }
 
         private void OnGUI()
         {
             EditorGUILayout.Space();
+
+
+
             EditorGUILayout.LabelField("Current Scene: " + EditorSceneManager.GetActiveScene().name, EditorStyles.boldLabel);
             EditorGUILayout.Space();
 
             if (!_unitySceneGroups.Any())
                 return;
+
+            if (_unitySceneGroups.Any(group => group.Foldout))
+            {
+                if (GUILayout.Button("Collapse All"))
+                {
+                    CollapseGroups();
+                }
+            }
+            else
+            {
+                if (GUILayout.Button("Expand All"))
+                {
+                    ExpandGroups();
+                }
+            }
 
             _scrollPosition = EditorGUILayout.BeginScrollView(_scrollPosition);
             _unitySceneGroups.ToList().ForEach(unitySceneGroup =>
@@ -46,21 +56,20 @@ namespace UnitySceneSwitcharoo
                 {
                     unitySceneGroup.UnityScenes.ForEach(unityScene =>
                     {
-                        EditorGUILayout.BeginHorizontal();
-
-                        GUI.backgroundColor = unityScene.IsActive ? Color.yellow : Color.white;
-                        if (GUILayout.Button(unityScene.DisplayName))
+                        using (var horizontal = new EditorGUILayout.HorizontalScope())
                         {
-                            LoadScene(unityScene.FullPath);
-                        }
-                        GUI.backgroundColor = Color.white;
+                            GUI.backgroundColor = unityScene.IsActive ? Color.yellow : Color.white;
+                            if (GUILayout.Button(unityScene.DisplayName))
+                            {
+                                OpenScene(unityScene.FullPath);
+                            }
+                            GUI.backgroundColor = Color.white;
 
-                        if (GUILayout.Button(_searchButtonGUIContent, GUILayout.Width(18), GUILayout.Height(18)))
-                        {
-                            PingSceneInProject(unityScene.FullPath);
+                            if (GUILayout.Button(_searchButtonGUIContent, GUILayout.Width(18), GUILayout.Height(18)))
+                            {
+                                PingSceneInProject(unityScene.FullPath);
+                            }
                         }
-
-                        EditorGUILayout.EndHorizontal();
                     });
                 }
                 EditorGUILayout.Space();
@@ -83,7 +92,7 @@ namespace UnitySceneSwitcharoo
             UpdateScenes();
         }
 
-        private static void LoadScene(string scenePath)
+        private static void OpenScene(string scenePath)
         {
             EditorSceneManager.OpenScene(scenePath);
             UpdateScenes();
@@ -122,7 +131,7 @@ namespace UnitySceneSwitcharoo
                     unitySceneGroups.Add(unitySceneGroup);
                 }
 
-                unitySceneGroup.UnityScenes.Add(new UnityScene()
+                unitySceneGroup.UnityScenes.Add(new UnityScene
                 {
                     DisplayName = sceneName,
                     FullPath = sceneFilePath,
@@ -135,12 +144,22 @@ namespace UnitySceneSwitcharoo
 
             return unitySceneGroups;
         }
+
+        private static void CollapseGroups()
+        {
+            _unitySceneGroups.ForEach(group => group.Foldout = false);
+        }
+
+        private static void ExpandGroups()
+        {
+            _unitySceneGroups.ForEach(group => group.Foldout = true);
+        }
     }
 
     public class UnityScene
     {
-        public string DisplayName { get; set; }
         public bool IsActive { get; set; }
+        public string DisplayName { get; set; }
         public string FullPath { get; set; }
         public string Directory { get; set; }
     }
@@ -148,14 +167,12 @@ namespace UnitySceneSwitcharoo
     public class UnitySceneGroup
     {
         public string GroupName { get; private set; }
-        public bool Foldout { get; set; }
-        public List<UnityScene> UnityScenes { get; set; }
+        public bool Foldout { get; set; } = true;
+        public List<UnityScene> UnityScenes { get; set; } = new List<UnityScene>();
 
         public UnitySceneGroup(string groupName)
         {
             GroupName = groupName;
-            Foldout = true;
-            UnityScenes = new List<UnityScene>();
         }
     }
 }
