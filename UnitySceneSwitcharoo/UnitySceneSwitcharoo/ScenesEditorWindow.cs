@@ -47,7 +47,7 @@ namespace UnitySceneSwitcharoo
             }
 
             _scrollPosition = EditorGUILayout.BeginScrollView(_scrollPosition);
-            _unitySceneGroups.ToList().ForEach(unitySceneGroup =>
+            _unitySceneGroups.ForEach(unitySceneGroup =>
             {
                 unitySceneGroup.Foldout = EditorGUILayout.Foldout(unitySceneGroup.Foldout, unitySceneGroup.GroupName);
 
