@@ -27,7 +27,9 @@ namespace UnitySceneSwitcharoo
             EditorGUILayout.Space();
 
             if (!_unitySceneGroups.Any())
+            {
                 return;
+            }
 
             if (_unitySceneGroups.Any(group => group.Foldout))
             {
@@ -60,8 +62,8 @@ namespace UnitySceneSwitcharoo
                             {
                                 OpenScene(unityScene.FullPath);
                             }
-                            GUI.backgroundColor = Color.white;
 
+                            GUI.backgroundColor = Color.white;
                             if (GUILayout.Button(_searchButtonGUIContent, GUILayout.Width(18), GUILayout.Height(18)))
                             {
                                 PingSceneInProject(unityScene.FullPath);
